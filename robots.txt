@@ -1,0 +1,13 @@
+# robots.txt for Stress.tw
+User-agent: *
+Allow: /
+
+# Disallow admin or private directories (if any)
+# Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://stress.tw/sitemap.xml
+
+# Crawl-delay (optional, for rate limiting)
+Crawl-delay: 1
+

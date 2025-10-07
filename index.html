@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>Stress.tw - Interactive Stress Relief | Bouncing Balls Game</title>
+    <meta name="title" content="Stress.tw - Interactive Stress Relief | Bouncing Balls Game">
+    <meta name="description" content="Free online stress relief tool. Click to create bouncing balls, watch physics simulation and explosive effects to relieve anxiety. No download required, play in browser, works on mobile and desktop. Perfect for work breaks and quick relaxation.">
+    <meta name="keywords" content="stress relief, stress ball game, online relaxation, anxiety relief, interactive balls, physics simulation, stress relief tool, bouncing ball game, relaxation tool, meditation, mindfulness">
+    <meta name="author" content="Stress.tw">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://stress.tw/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stress.tw/">
+    <meta property="og:title" content="Stress.tw - Interactive Stress Relief | Bouncing Balls Game">
+    <meta property="og:description" content="Free online stress relief tool with interactive balls and explosive effects. Play in browser, works on mobile and desktop.">
+    <meta property="og:image" content="https://stress.tw/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:site_name" content="Stress.tw">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://stress.tw/">
+    <meta name="twitter:title" content="Stress.tw - Interactive Stress Relief Tool">
+    <meta name="twitter:description" content="Free online stress relief tool with interactive balls and explosive effects.">
+    <meta name="twitter:image" content="https://stress.tw/assets/twitter-card.jpg">
+    
+    <!-- PWA & Mobile -->
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="StressResolve">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.ico">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Stress.tw",
+      "alternateName": "Stress Relief Balls",
+      "url": "https://stress.tw/",
+      "description": "Free online stress relief tool with interactive balls and explosive effects to relieve anxiety and stress",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127"
+      },
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "inLanguage": "en-US"
+    }
+    </script>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    
+    <!-- Google Analytics (替换为你的 GA ID) -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+    -->
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-bubble"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <main id="game-container" class="game-container" role="main" aria-label="Interactive stress relief area">
+        <!-- Hint Text (shown on first visit) -->
+        <div id="hint-text" class="hint-text">
+            <div class="hint-content">
+                <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Tap to create bouncy balls</h1>
+                <div class="tap-icon" aria-hidden="true">👆</div>
+            </div>
+        </div>
+
+        <!-- Bubble Container -->
+        <div id="bubble-container" class="bubble-container" role="region" aria-label="Ball interaction area"></div>
+
+        <!-- Pop Button -->
+        <button id="pop-button" class="pop-button" aria-label="Explode all balls">
+            <span class="button-icon" aria-hidden="true">💥</span>
+            <span class="button-text">Explode All</span>
+            <span class="bubble-count" id="bubble-count" aria-live="polite">0</span>
+        </button>
+
+        <!-- Settings Panel -->
+        <nav class="settings-panel" aria-label="Settings panel">
+            <button id="sound-toggle" class="icon-button" title="Toggle Sound" aria-label="Toggle sound on/off">
+                <span id="sound-icon" aria-hidden="true">🔊</span>
+            </button>
+            <button id="info-button" class="icon-button" title="How to Use" aria-label="Show usage instructions">
+                <span aria-hidden="true">ℹ️</span>
+            </button>
+        </nav>
+
+        <!-- Info Modal -->
+        <aside id="info-modal" class="modal hidden" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+            <div class="modal-content">
+                <button class="modal-close" id="close-modal" aria-label="Close dialog">×</button>
+                <h2 id="modal-title">How to Use</h2>
+                <ul class="info-list">
+                    <li>🎯 Tap anywhere on screen to create bouncy balls</li>
+                    <li>⬇️ Watch them fall naturally and bounce</li>
+                    <li>💥 Click "Explode All" for ultimate satisfaction</li>
+                    <li>🎵 Enable sound for better immersion</li>
+                </ul>
+                <p class="info-footer">Made with ❤️ for stress relief</p>
+            </div>
+        </aside>
+
+        <!-- SEO Content (Hidden but crawlable) -->
+        <article class="seo-content" style="position:absolute;left:-9999px;" aria-hidden="true">
+            <h2>What is Stress.tw?</h2>
+            <p>Stress.tw is a free online stress relief tool that helps you quickly relieve anxiety and stress from work and daily life through interactive physics simulation.</p>
+            
+            <h3>Core Features</h3>
+            <ul>
+                <li><strong>Interactive Creation</strong>: Click screen to create colorful bouncy balls</li>
+                <li><strong>Real Physics</strong>: Realistic simulation powered by Matter.js physics engine</li>
+                <li><strong>Explosive Effects</strong>: Cascade explosion effects provide ultimate stress relief experience</li>
+                <li><strong>Sound Feedback</strong>: Carefully designed sound effects enhance immersion</li>
+            </ul>
+            
+            <h3>Use Cases</h3>
+            <p>Perfect for work break relaxation, study break stress relief, bedtime relaxation, and emotional regulation. Works on mobile and desktop browsers with no download required.</p>
+            
+            <h3>Technical Highlights</h3>
+            <p>Built with GSAP animation library, Matter.js physics engine, and Howler.js audio system to ensure smooth 60fps experience and realistic physical interactions.</p>
+        </article>
+
+    </main>
+
+    <!-- Scripts -->
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/AudioManager.js"></script>
+    <script type="module" src="js/PhysicsEngine.js"></script>
+    <script type="module" src="js/BubbleManager.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

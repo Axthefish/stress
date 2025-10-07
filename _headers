@@ -1,0 +1,36 @@
+# Netlify/Vercel Headers for Performance & Security
+
+/*
+  # Security Headers
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  
+  # Cache Control
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache HTML for shorter duration
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Don't cache the main page
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Cache CSS & JS
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache assets
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/audio/*
+  Cache-Control: public, max-age=31536000, immutable
+
+

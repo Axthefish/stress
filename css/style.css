@@ -1,0 +1,568 @@
+/* ========================================
+   Global Styles & Reset
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colors */
+    --primary-color: #ff6b9d;
+    --secondary-color: #4ecdc4;
+    --bg-dark-1: #0a0e27;
+    --bg-dark-2: #1a1f3a;
+    --text-light: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.7);
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Z-index layers */
+    --z-background: 0;
+    --z-bubbles: 10;
+    --z-ui: 100;
+    --z-modal: 1000;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background: linear-gradient(135deg, var(--bg-dark-1) 0%, var(--bg-dark-2) 100%);
+    background-attachment: fixed;
+    color: var(--text-light);
+    cursor: crosshair;
+}
+
+/* ========================================
+   Loading Screen
+   ======================================== */
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
+}
+
+.loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-bubble {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+/* ========================================
+   Game Container
+   ======================================== */
+
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.bubble-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    z-index: var(--z-bubbles);
+}
+
+/* ========================================
+   Hint Text
+   ======================================== */
+
+.hint-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: var(--z-ui);
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity var(--transition-slow);
+}
+
+.hint-text.hidden {
+    opacity: 0;
+}
+
+.hint-content h2 {
+    font-size: 2rem;
+    font-weight: 300;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-light);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.tap-icon {
+    font-size: 3rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+/* ========================================
+   Bubbles
+   ======================================== */
+
+.bubble {
+    position: absolute;
+    pointer-events: none;
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    cursor: pointer;
+    
+    /* Soft, bouncy ball aesthetic - jelly-like material */
+    background: radial-gradient(
+        ellipse at 25% 25%,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.15) 45%,
+        rgba(255, 255, 255, 0.25) 100%
+    );
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    
+    /* Soft shadow for depth - like resting on surface */
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.1),
+        inset 2px 2px 15px rgba(255, 255, 255, 0.8),
+        inset -2px -2px 10px rgba(0, 0, 0, 0.08),
+        0 0 50px rgba(255, 255, 255, 0.2);
+    
+    /* Softer, more playful */
+    filter: contrast(1) brightness(1.08) saturate(1.2);
+    transition: none;
+}
+
+.bubble.circle {
+    border-radius: 50%;
+}
+
+.bubble.ellipse {
+    border-radius: 50%;
+}
+
+.bubble.blob {
+    border-radius: 45%;
+}
+
+/* Main highlight - bright and prominent for bouncy feel */
+.bubble::before {
+    content: '';
+    position: absolute;
+    top: 12%;
+    left: 18%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(
+        ellipse at 35% 35%,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 255, 255, 0.75) 25%,
+        rgba(255, 255, 255, 0.3) 55%,
+        transparent 75%
+    );
+    border-radius: 50%;
+    filter: blur(8px);
+    pointer-events: none;
+    animation: shimmerGentle 3s ease-in-out infinite;
+}
+
+/* Secondary soft glow */
+.bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    right: 25%;
+    width: 25%;
+    height: 25%;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 75%
+    );
+    border-radius: 50%;
+    filter: blur(6px);
+    pointer-events: none;
+}
+
+/* Gentle shimmer for playful feel */
+@keyframes shimmerGentle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Particle for explosion effect */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* ========================================
+   Pop Button
+   ======================================== */
+
+.pop-button {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-ui);
+    
+    /* Style - More vibrant for explosion action */
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-light);
+    background: linear-gradient(135deg, #ff6b9d, #ff4757, #ee5a6f);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    cursor: pointer;
+    
+    /* Powerful shadow for action button */
+    box-shadow: 
+        0 12px 35px rgba(255, 71, 87, 0.5),
+        0 5px 15px rgba(0, 0, 0, 0.3),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3);
+    transition: all var(--transition-normal);
+    
+    /* Layout */
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pop-button:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 
+        0 15px 40px rgba(255, 107, 157, 0.4),
+        0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.pop-button:active {
+    transform: translateX(-50%) scale(0.98);
+}
+
+.pop-button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.button-icon {
+    font-size: 1.5rem;
+}
+
+.button-text {
+    font-size: 1.1rem;
+}
+
+.bubble-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--text-light);
+    font-size: 0.95rem;
+    font-weight: bold;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    min-width: 28px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+/* ========================================
+   Settings Panel
+   ======================================== */
+
+.settings-panel {
+    position: fixed;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    z-index: var(--z-ui);
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.icon-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.icon-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.icon-button:active {
+    transform: scale(0.95);
+}
+
+/* ========================================
+   Modal
+   ======================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    transition: opacity var(--transition-normal), visibility var(--transition-normal);
+}
+
+.modal.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: rgba(26, 31, 58, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-content h2 {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-light);
+}
+
+.info-list {
+    list-style: none;
+    margin-bottom: var(--spacing-md);
+}
+
+.info-list li {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    font-size: 1.1rem;
+}
+
+.info-footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: var(--spacing-md);
+}
+
+
+/* ========================================
+   Ripple Effect
+   ======================================== */
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    width: 40px;
+    height: 40px;
+    z-index: var(--z-bubbles);
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+/* Mobile */
+@media (max-width: 768px) {
+    :root {
+        --size-multiplier: 0.8;
+    }
+    
+    .hint-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .tap-icon {
+        font-size: 2.5rem;
+    }
+    
+    .pop-button {
+        bottom: var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: 1rem;
+        width: 80%;
+        max-width: 300px;
+        justify-content: center;
+    }
+    
+    .button-text {
+        font-size: 1rem;
+    }
+    
+    .settings-panel {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+    
+    .icon-button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+    }
+    
+    .modal-content {
+        padding: var(--spacing-lg);
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .info-list li {
+        font-size: 1rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+    :root {
+        --size-multiplier: 0.9;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+    :root {
+        --size-multiplier: 1;
+    }
+    
+    body {
+        cursor: default;
+    }
+    
+    .bubble-container {
+        cursor: crosshair;
+    }
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+button:focus-visible {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 4px;
+}
+
