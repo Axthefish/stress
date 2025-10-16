@@ -28,7 +28,8 @@ class PhysicsEngine {
             const { Engine, World, Bodies, Body } = Matter;
             
             this.engine = Engine.create({
-                gravity: { x: 0, y: 1.0 } // Natural downward gravity
+                gravity: { x: 0, y: 1.0 }, // Natural downward gravity
+                enableSleeping: true // Enable sleep mode for better stacking
             });
             
             this.world = this.engine.world;
@@ -112,14 +113,17 @@ class PhysicsEngine {
             bubble.y,
             bubble.size / 2,
             {
-                restitution: 0.65,     // Bounciness (0.65 for soft bouncy feel)
-                friction: 0.02,        // Low friction
-                frictionAir: 0.015,    // Air resistance
-                density: 0.001,        // Light but with weight
+                restitution: 0.3,      // Lower bounciness for better stacking
+                friction: 0.1,         // Higher friction for better grip
+                frictionAir: 0.05,     // More air resistance to slow down faster
+                frictionStatic: 0.5,   // Static friction to prevent sliding when stacked
+                density: 0.005,        // Heavier for more stable stacking
+                slop: 0.05,           // Collision tolerance
+                sleepThreshold: 60,    // Time before sleeping (in ms)
                 collisionFilter: {
-                    group: 1,
-                    category: 1,
-                    mask: 1
+                    group: 0,
+                    category: 0x0001,
+                    mask: 0xFFFF
                 }
             }
         );
