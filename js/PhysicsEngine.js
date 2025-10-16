@@ -103,7 +103,7 @@ class PhysicsEngine {
     }
 
     /**
-     * Add bubble using Matter.js
+     * Add bubble using Matter.js - Enhanced bounce physics
      */
     addBubbleMatter(bubble) {
         const { Bodies, World, Body } = this.Matter;
@@ -113,11 +113,11 @@ class PhysicsEngine {
             bubble.y,
             bubble.size / 2,
             {
-                restitution: 0.3,      // Lower bounciness for better stacking
-                friction: 0.1,         // Higher friction for better grip
-                frictionAir: 0.05,     // More air resistance to slow down faster
-                frictionStatic: 0.5,   // Static friction to prevent sliding when stacked
-                density: 0.005,        // Heavier for more stable stacking
+                restitution: 0.65,     // Increased bounciness from 0.3 to 0.65
+                friction: 0.2,         // Increased friction for stable stacking
+                frictionAir: 0.05,     // Air resistance
+                frictionStatic: 0.5,   // Static friction to prevent sliding
+                density: 0.005,        // Heavier for stable stacking
                 slop: 0.05,           // Collision tolerance
                 sleepThreshold: 60,    // Time before sleeping (in ms)
                 collisionFilter: {

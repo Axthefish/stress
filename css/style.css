@@ -46,7 +46,7 @@ html, body {
 }
 
 body {
-    background: linear-gradient(135deg, var(--bg-dark-1) 0%, var(--bg-dark-2) 100%);
+    background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 100%);
     background-attachment: fixed;
     color: var(--text-light);
     cursor: crosshair;
@@ -164,28 +164,28 @@ body {
     transform: translateZ(0);
     cursor: pointer;
     
-    /* Soft, bouncy ball aesthetic - jelly-like material */
+    /* Vibrant candy ball aesthetic - solid and glossy */
     background: radial-gradient(
-        ellipse at 25% 25%,
-        rgba(255, 255, 255, 0.6) 0%,
-        rgba(255, 255, 255, 0.15) 45%,
-        rgba(255, 255, 255, 0.25) 100%
+        ellipse at 30% 30%,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.3) 30%,
+        currentColor 70%,
+        currentColor 100%
     );
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 3px solid rgba(255, 255, 255, 0.6);
     
-    /* Soft shadow for depth - like resting on surface */
+    /* Strong shadow for depth and impact */
     box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.15),
-        0 5px 15px rgba(0, 0, 0, 0.1),
-        inset 2px 2px 15px rgba(255, 255, 255, 0.8),
-        inset -2px -2px 10px rgba(0, 0, 0, 0.08),
-        0 0 50px rgba(255, 255, 255, 0.2);
+        0 20px 50px rgba(0, 0, 0, 0.4),
+        0 8px 20px rgba(0, 0, 0, 0.3),
+        inset 3px 3px 20px rgba(255, 255, 255, 0.9),
+        inset -3px -3px 15px rgba(0, 0, 0, 0.15),
+        0 0 40px currentColor;
     
-    /* Softer, more playful */
-    filter: contrast(1) brightness(1.08) saturate(1.2);
+    /* Vibrant, saturated colors */
+    filter: contrast(1.15) brightness(1.15) saturate(1.5);
     transition: none;
+    animation: shimmerPulse 3s ease-in-out infinite;
 }
 
 .bubble.circle {
@@ -200,25 +200,25 @@ body {
     border-radius: 45%;
 }
 
-/* Main highlight - bright and prominent for bouncy feel */
+/* Main highlight - large and brilliant for candy feel */
 .bubble::before {
     content: '';
     position: absolute;
-    top: 12%;
-    left: 18%;
-    width: 40%;
-    height: 40%;
+    top: 10%;
+    left: 15%;
+    width: 45%;
+    height: 45%;
     background: radial-gradient(
-        ellipse at 35% 35%,
+        ellipse at 40% 40%,
         rgba(255, 255, 255, 1) 0%,
-        rgba(255, 255, 255, 0.75) 25%,
-        rgba(255, 255, 255, 0.3) 55%,
+        rgba(255, 255, 255, 0.95) 20%,
+        rgba(255, 255, 255, 0.5) 50%,
         transparent 75%
     );
     border-radius: 50%;
-    filter: blur(8px);
+    filter: blur(6px);
     pointer-events: none;
-    animation: shimmerGentle 3s ease-in-out infinite;
+    animation: shimmerGlow 2.5s ease-in-out infinite;
 }
 
 /* Secondary soft glow */
@@ -249,6 +249,28 @@ body {
     50% {
         opacity: 0.8;
         transform: scale(1.05);
+    }
+}
+
+/* Shimmer pulse for candy balls */
+@keyframes shimmerPulse {
+    0%, 100% {
+        filter: contrast(1.15) brightness(1.15) saturate(1.5);
+    }
+    50% {
+        filter: contrast(1.2) brightness(1.2) saturate(1.6);
+    }
+}
+
+/* Shimmer glow for highlights */
+@keyframes shimmerGlow {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.08);
     }
 }
 
@@ -564,5 +586,64 @@ body {
 button:focus-visible {
     outline: 2px solid var(--secondary-color);
     outline-offset: 4px;
+}
+
+/* ========================================
+   Hold Mode Indicator & Combo Text
+   ======================================== */
+
+.hold-indicator {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+    pointer-events: none;
+    z-index: var(--z-ui);
+    animation: holdPulse 0.6s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes holdPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0.5;
+    }
+}
+
+.combo-text {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 
+        0 0 20px rgba(255, 255, 255, 0.8),
+        0 0 40px currentColor,
+        0 5px 30px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 10001;
+    letter-spacing: 0.1em;
+}
+
+.combo-text.rainbow {
+    background: linear-gradient(90deg, 
+        #ff0080, #ff8c00, #40e0d0, #9370db, #ff0080);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowFlow 2s linear infinite;
+}
+
+@keyframes rainbowFlow {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
 }
 

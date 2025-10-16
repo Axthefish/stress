@@ -17,6 +17,13 @@ class StressResolveGame {
         
         // UI elements
         this.elements = {};
+        
+        // Hold to generate state
+        this.isHolding = false;
+        this.holdTimer = null;
+        this.holdIndicator = null;
+        this.lastHoldX = 0;
+        this.lastHoldY = 0;
     }
 
     /**
@@ -98,15 +105,55 @@ class StressResolveGame {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Bubble creation on click/tap
+        // Bubble creation on click/tap (single click)
         this.elements.bubbleContainer.addEventListener('click', (e) => {
-            this.handleBubbleCreate(e);
+            // Only create if not holding
+            if (!this.isHolding) {
+                this.handleBubbleCreate(e);
+            }
+        });
+
+        // Hold to generate - Mouse events
+        this.elements.bubbleContainer.addEventListener('mousedown', (e) => {
+            this.handleHoldStart(e);
+        });
+
+        this.elements.bubbleContainer.addEventListener('mouseup', (e) => {
+            this.handleHoldEnd(e);
+        });
+
+        this.elements.bubbleContainer.addEventListener('mouseleave', (e) => {
+            this.handleHoldEnd(e);
+        });
+
+        this.elements.bubbleContainer.addEventListener('mousemove', (e) => {
+            if (this.isHolding) {
+                this.lastHoldX = e.clientX;
+                this.lastHoldY = e.clientY;
+                this.updateHoldIndicator(e.clientX, e.clientY);
+            }
+        });
+
+        // Hold to generate - Touch events
+        this.elements.bubbleContainer.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                this.handleHoldStart({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+            e.preventDefault();
         });
 
         this.elements.bubbleContainer.addEventListener('touchend', (e) => {
-            if (e.changedTouches.length > 0) {
-                const touch = e.changedTouches[0];
-                this.handleBubbleCreate({ clientX: touch.clientX, clientY: touch.clientY });
+            this.handleHoldEnd(e);
+            e.preventDefault();
+        });
+
+        this.elements.bubbleContainer.addEventListener('touchmove', (e) => {
+            if (this.isHolding && e.touches.length > 0) {
+                const touch = e.touches[0];
+                this.lastHoldX = touch.clientX;
+                this.lastHoldY = touch.clientY;
+                this.updateHoldIndicator(touch.clientX, touch.clientY);
             }
             e.preventDefault();
         });
@@ -151,6 +198,83 @@ class StressResolveGame {
             this.elements.bubbleContainer.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
             });
+        }
+    }
+
+    /**
+     * Handle hold start
+     */
+    handleHoldStart(event) {
+        this.isHolding = true;
+        this.lastHoldX = event.clientX;
+        this.lastHoldY = event.clientY;
+        
+        // Create first bubble immediately
+        this.handleBubbleCreate(event);
+        
+        // Show hold indicator
+        this.showHoldIndicator(event.clientX, event.clientY);
+        
+        // Start continuous generation
+        const currentBubbleCount = bubbleManager.getBubbleCount();
+        const generationInterval = currentBubbleCount > 100 ? 120 : 80; // Slower if many balls
+        
+        this.holdTimer = setInterval(() => {
+            if (this.isHolding && bubbleManager.getBubbleCount() < bubbleManager.maxBubbles) {
+                // Create bubble at current position
+                bubbleManager.createBubble(this.lastHoldX, this.lastHoldY);
+                this.updateBubbleCount();
+            }
+        }, generationInterval);
+    }
+
+    /**
+     * Handle hold end
+     */
+    handleHoldEnd(event) {
+        this.isHolding = false;
+        
+        // Clear interval
+        if (this.holdTimer) {
+            clearInterval(this.holdTimer);
+            this.holdTimer = null;
+        }
+        
+        // Hide hold indicator
+        this.hideHoldIndicator();
+    }
+
+    /**
+     * Show hold indicator
+     */
+    showHoldIndicator(x, y) {
+        if (!this.holdIndicator) {
+            this.holdIndicator = document.createElement('div');
+            this.holdIndicator.className = 'hold-indicator';
+            document.body.appendChild(this.holdIndicator);
+        }
+        
+        this.holdIndicator.style.left = x + 'px';
+        this.holdIndicator.style.top = y + 'px';
+        this.holdIndicator.style.display = 'block';
+    }
+
+    /**
+     * Update hold indicator position
+     */
+    updateHoldIndicator(x, y) {
+        if (this.holdIndicator) {
+            this.holdIndicator.style.left = x + 'px';
+            this.holdIndicator.style.top = y + 'px';
+        }
+    }
+
+    /**
+     * Hide hold indicator
+     */
+    hideHoldIndicator() {
+        if (this.holdIndicator) {
+            this.holdIndicator.style.display = 'none';
         }
     }
 

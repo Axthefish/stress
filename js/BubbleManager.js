@@ -78,18 +78,18 @@ class BubbleManager {
      * Generate bubble data
      */
     generateBubbleData(x, y) {
-        // Mostly circles for soft bouncy ball feel
+        // Mostly circles for bouncy ball feel
         const shapeWeights = ['circle', 'circle', 'circle', 'circle', 'ellipse'];
         const shape = randomChoice(shapeWeights);
         const size = randomRange(50, 100); // Medium size for satisfying physics
         
-        // Soft pastel colors (macaron palette)
+        // Vibrant candy colors (high saturation, medium-bright lightness)
         const colorPalettes = [
-            randomHSL(340, 360, 70, 80),  // Soft pink
-            randomHSL(270, 290, 70, 80),  // Soft purple
-            randomHSL(190, 210, 70, 80),  // Soft blue
-            randomHSL(150, 170, 65, 75),  // Soft green
-            randomHSL(25, 35, 70, 80),    // Soft orange/peach
+            randomHSL(330, 350, 95, 60),  // Neon Pink
+            randomHSL(270, 290, 95, 60),  // Magic Purple
+            randomHSL(200, 220, 95, 55),  // Electric Blue
+            randomHSL(140, 160, 95, 55),  // Fluorescent Green
+            randomHSL(20, 40, 95, 60),    // Passionate Orange
         ];
         
         return {
@@ -99,7 +99,7 @@ class BubbleManager {
             shape: shape,
             size: size,
             color: randomChoice(colorPalettes),
-            opacity: randomRange(0.75, 0.85), // More visible for impact
+            opacity: randomRange(0.9, 0.95), // High visibility
             rotation: randomRange(0, 360),
             scale: 1,
             scaleX: 1,
@@ -124,7 +124,7 @@ class BubbleManager {
             height: ${adjustedSize}px;
             left: ${bubble.x - bubble.size / 2}px;
             top: ${bubble.y - adjustedSize / 2}px;
-            background: ${bubble.color};
+            color: ${bubble.color};
             opacity: ${bubble.opacity};
             transform: rotate(${bubble.rotation}deg) scale(0);
             transition: none;
@@ -155,13 +155,19 @@ class BubbleManager {
     }
 
     /**
-     * Animate bubble creation (scale in) - optimized
+     * Animate bubble creation - Exaggerated pop-in with rotation
      */
     animateBubbleCreation(bubble) {
+        const randomRotation = randomRange(0, 360);
         gsap.to(bubble.element, {
             scale: 1,
-            duration: 0.3,
-            ease: "back.out(1.7)"
+            rotation: randomRotation,
+            duration: 0.5,
+            ease: "back.out(2.5)",
+            keyframes: [
+                { scale: 1.2, duration: 0.25 },
+                { scale: 1, duration: 0.25 }
+            ]
         });
     }
 
@@ -197,29 +203,29 @@ class BubbleManager {
     }
     
     /**
-     * Animate landing squash effect
+     * Animate landing squash effect - Enhanced deformation
      */
     animateLandingSquash(bubble, impactVelocity) {
         if (!bubble.element) return;
         
-        // Calculate squash amount based on impact velocity
-        const squashAmount = Math.min(impactVelocity / 20, 0.25);
+        // Calculate squash amount based on impact velocity - increased from 0.25 to 0.4
+        const squashAmount = Math.min(impactVelocity / 20, 0.4);
         const scaleX = 1 + squashAmount;
         const scaleY = 1 - squashAmount;
         
-        // Squash
+        // Squash - increased duration from 0.1 to 0.15
         gsap.to(bubble.element, {
             scaleX: scaleX,
             scaleY: scaleY,
-            duration: 0.1,
+            duration: 0.15,
             ease: "power2.out",
             onComplete: () => {
-                // Stretch back
+                // Stretch back - stronger elastic recovery
                 gsap.to(bubble.element, {
                     scaleX: 1,
                     scaleY: 1,
-                    duration: 0.3,
-                    ease: "elastic.out(1, 0.3)"
+                    duration: 0.35,
+                    ease: "elastic.out(1, 0.5)"
                 });
             }
         });
@@ -295,8 +301,8 @@ class BubbleManager {
         bubblesToPop.forEach(bubble => {
             if (bubble.element) {
                 gsap.to(bubble.element, {
-                    scale: 0.85,
-                    duration: 0.08,
+                    scale: 0.8,
+                    duration: 0.12,
                     ease: "power2.in"
                 });
             }
@@ -306,20 +312,23 @@ class BubbleManager {
             // === PHASE 2: CASCADE EXPLOSION (连锁爆炸) ===
             
             // Haptic feedback (mobile)
-            this.triggerHapticFeedback();
+            this.triggerHapticFeedback(bubblesToPop.length);
             
-            // Screen flash
-            this.createScreenFlash();
+            // Screen flash - enhanced
+            this.createScreenFlash(bubblesToPop.length, centerX, centerY);
             
-            // Screen shake
-            this.createScreenShake();
+            // Screen shake - enhanced
+            this.createScreenShake(bubblesToPop.length);
             
             // Initial shockwave from center
             this.createImpactShockwave(centerX, centerY);
             
             // Play sounds
             audioManager.playPopBGM();
-        audioManager.playExplosionSound();
+            audioManager.playExplosionSound();
+            
+            // Show combo text based on count
+            this.showComboText(bubblesToPop.length);
             
             // Cascade explosion - each bubble explodes individually with slight delay
             this.explodeCascade(bubblesToPop);
@@ -329,18 +338,22 @@ class BubbleManager {
                 this.isPopping = false;
             }, 1500);
             
-        }, 100); // Anticipation delay
+        }, 120); // Anticipation delay
     }
     
     /**
-     * Trigger haptic feedback on mobile devices
+     * Trigger haptic feedback on mobile devices - Enhanced
      */
-    triggerHapticFeedback() {
+    triggerHapticFeedback(count = 0) {
         // Vibration API for mobile devices
         if (navigator.vibrate) {
-            // Pattern: [vibrate, pause, vibrate]
-            // Strong-weak-strong for impact feel
-            navigator.vibrate([50, 30, 100]);
+            // Pattern: [vibrate, pause, vibrate] - stronger pattern
+            // Adjust intensity based on ball count
+            let pattern = [100, 50, 150];
+            if (count > 50) {
+                pattern = [150, 50, 200]; // Stronger for large explosions
+            }
+            navigator.vibrate(pattern);
         }
         
         // iOS Haptic Feedback (if available)
@@ -350,54 +363,89 @@ class BubbleManager {
     }
     
     /**
-     * Screen flash effect for maximum impact
+     * Screen flash effect - Enhanced brightness and duration
      */
-    createScreenFlash() {
+    createScreenFlash(count = 0, centerX = window.innerWidth / 2, centerY = window.innerHeight / 2) {
         const flash = document.createElement('div');
+        const centerPercent = `${(centerX / window.innerWidth) * 100}% ${(centerY / window.innerHeight) * 100}%`;
         flash.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+            background: radial-gradient(circle at ${centerPercent}, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
             pointer-events: none;
             z-index: 9999;
             opacity: 0;
         `;
         document.body.appendChild(flash);
         
-        // Quick flash
+        // Stronger, longer flash
         gsap.to(flash, {
             opacity: 1,
-            duration: 0.05,
+            duration: 0.08,
             onComplete: () => {
                 gsap.to(flash, {
                     opacity: 0,
-                    duration: 0.25,
+                    duration: 0.5,
                     ease: "power2.out",
                     onComplete: () => flash.remove()
                 });
             }
         });
+        
+        // Multiple flashes for large explosions
+        if (count > 50) {
+            setTimeout(() => {
+                const flash2 = document.createElement('div');
+                flash2.style.cssText = flash.style.cssText;
+                document.body.appendChild(flash2);
+                gsap.to(flash2, {
+                    opacity: 0.7,
+                    duration: 0.05,
+                    onComplete: () => {
+                        gsap.to(flash2, {
+                            opacity: 0,
+                            duration: 0.4,
+                            ease: "power2.out",
+                            onComplete: () => flash2.remove()
+                        });
+                    }
+                });
+            }, 150);
+        }
     }
     
     /**
-     * Screen shake effect
+     * Screen shake effect - Enhanced amplitude and pattern
      */
-    createScreenShake() {
+    createScreenShake(count = 0) {
         const container = document.getElementById('game-container');
         if (!container) return;
         
-        gsap.to(container, {
-            x: 5,
-            duration: 0.05,
-            yoyo: true,
-            repeat: 5,
-            ease: "power2.inOut",
+        // Stronger shake with decreasing amplitude
+        const timeline = gsap.timeline({
             onComplete: () => {
-                gsap.set(container, { x: 0 });
+                gsap.set(container, { x: 0, y: 0 });
             }
+        });
+        
+        // Large to small shake pattern - 8-10 shakes
+        const shakes = [
+            { x: 20, y: 15, duration: 0.04 },
+            { x: -18, y: -12, duration: 0.04 },
+            { x: 15, y: 10, duration: 0.04 },
+            { x: -12, y: -8, duration: 0.04 },
+            { x: 10, y: 6, duration: 0.04 },
+            { x: -8, y: -4, duration: 0.04 },
+            { x: 5, y: 3, duration: 0.04 },
+            { x: -3, y: -2, duration: 0.04 },
+            { x: 0, y: 0, duration: 0.04 }
+        ];
+        
+        shakes.forEach(shake => {
+            timeline.to(container, shake);
         });
     }
     
@@ -438,22 +486,21 @@ class BubbleManager {
     }
     
     /**
-     * Cascade explosion - each bubble explodes individually with stunning effect
-     * Performance-optimized for large numbers of bubbles
+     * Cascade explosion - Optimized timing for better visual clarity
      */
     explodeCascade(bubblesToPop) {
         const totalBubbles = bubblesToPop.length;
         
-        // Dynamic performance scaling based on bubble count
-        let delayPerBubble = 4;
+        // Optimized timing - slower to see each explosion
+        let delayPerBubble = 10; // Default 10ms
         let soundInterval = 5;
         
         // Adjust timing for large numbers
         if (totalBubbles > 50) {
-            delayPerBubble = 3; // Faster cascade for very large numbers
+            delayPerBubble = 5; // Faster cascade for very large numbers
             soundInterval = 10;
-        } else if (totalBubbles > 30) {
-            delayPerBubble = 3.5;
+        } else if (totalBubbles > 20) {
+            delayPerBubble = 7;
             soundInterval = 8;
         }
         
@@ -546,7 +593,7 @@ class BubbleManager {
     }
     
     /**
-     * Create bright flash ring on bubble explosion (optimized)
+     * Create bright flash ring on bubble explosion - Longer duration
      */
     createBubbleFlashRing(x, y, color, size) {
         const flash = document.createElement('div');
@@ -556,37 +603,38 @@ class BubbleManager {
             top: ${y}px;
             width: ${size}px;
             height: ${size}px;
-            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, ${color} 50%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,255,255,1) 0%, ${color} 50%, transparent 70%);
             border-radius: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 9998;
             will-change: transform, opacity;
+            box-shadow: 0 0 30px ${color};
         `;
         document.body.appendChild(flash);
         
         gsap.to(flash, {
-            scale: 3,
+            scale: 4,
             opacity: 0,
-            duration: 0.25,
+            duration: 0.6,
             ease: "power2.out",
             onComplete: () => flash.remove()
         });
     }
     
     /**
-     * Create radial particle burst (optimized with dynamic particle count)
+     * Create radial particle burst - Enhanced size and count
      */
     createRadialBurst(x, y, color, size, particleCount = 4) {
-        // Allow external control of particle count for performance scaling
-        const particleSize = Math.min(size / 8, 8);
+        // Larger particles for more impact - 12-24px range
+        const particleSize = randomRange(12, 24);
         
         for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2 + Math.random() * 0.3;
-            const distance = randomRange(40, 80);
+            const distance = randomRange(60, 120);
             
             const particle = createParticle(x, y, color, particleSize);
-            particle.style.boxShadow = `0 0 ${particleSize * 2}px ${color}`;
+            particle.style.boxShadow = `0 0 ${particleSize * 3}px ${color}`;
             document.body.appendChild(particle);
             
             const tx = x + Math.cos(angle) * distance;
@@ -597,7 +645,7 @@ class BubbleManager {
                 y: ty - y,
                 opacity: 0,
                 scale: 0,
-                duration: 0.3,
+                duration: 0.5,
                 ease: "power1.out",
                 onComplete: () => particle.remove()
             });
@@ -878,6 +926,63 @@ class BubbleManager {
             physicsEngine.removeBubble(bubble);
         });
         this.bubbles = [];
+    }
+
+    /**
+     * Show combo text based on bubble count
+     */
+    showComboText(count) {
+        let text = '';
+        let colorClass = '';
+        
+        if (count >= 100) {
+            text = 'INSANE!!!';
+            colorClass = 'rainbow';
+            audioManager.playComboSound(3);
+        } else if (count >= 50) {
+            text = 'AMAZING!';
+            colorClass = 'rainbow';
+            audioManager.playComboSound(2);
+        } else if (count >= 30) {
+            text = 'NICE!';
+            colorClass = '';
+            audioManager.playComboSound(1);
+        } else {
+            return; // No combo text for < 30 balls
+        }
+        
+        const comboElement = document.createElement('div');
+        comboElement.className = `combo-text ${colorClass}`;
+        comboElement.textContent = text;
+        document.body.appendChild(comboElement);
+        
+        // Animate: scale from 0 to 2 to 1.5, then fade out
+        gsap.fromTo(comboElement, 
+            { scale: 0, opacity: 0 },
+            { 
+                scale: 2, 
+                opacity: 1, 
+                duration: 0.3,
+                ease: "back.out(2)",
+                onComplete: () => {
+                    gsap.to(comboElement, {
+                        scale: 1.5,
+                        duration: 0.2,
+                        ease: "power2.out",
+                        onComplete: () => {
+                            gsap.to(comboElement, {
+                                opacity: 0,
+                                y: -50,
+                                duration: 0.5,
+                                delay: 0.5,
+                                ease: "power2.in",
+                                onComplete: () => comboElement.remove()
+                            });
+                        }
+                    });
+                }
+            }
+        );
     }
 
     /**

@@ -61,7 +61,7 @@ class AudioManager {
     }
 
     /**
-     * Create a bubble pop sound using Web Audio API
+     * Create a bubble pop sound - Enhanced for more impact
      */
     createPopSound(options = {}) {
         if (!this.enabled || !this.audioContext || !this.masterGain) return;
@@ -72,9 +72,9 @@ class AudioManager {
         }
 
         const {
-            frequency = randomRange(400, 800), // Lower, gentler frequencies
+            frequency = randomRange(600, 1200), // Higher, crisper frequencies (was 400-800)
             duration = 0.15,
-            volume = 0.08 // Even softer base volume
+            volume = 0.20 // 3x boost from 0.08 to 0.20
         } = options;
 
         try {
@@ -85,38 +85,58 @@ class AudioManager {
             const adjustedVolume = volume * volumeScale;
             
             const oscillator = this.audioContext.createOscillator();
+            const oscillator2 = this.audioContext.createOscillator(); // High frequency harmonic
             const gainNode = this.audioContext.createGain();
+            const gainNode2 = this.audioContext.createGain();
             const filter = this.audioContext.createBiquadFilter();
 
             // Connect through master gain
             oscillator.connect(filter);
+            oscillator2.connect(filter);
             filter.connect(gainNode);
-            gainNode.connect(this.masterGain);
+            gainNode.connect(gainNode2);
+            gainNode2.connect(this.masterGain);
 
-            // Configure oscillator (sine wave for soft, gentle pop)
+            // Configure main oscillator (sine wave for pop)
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(
-                frequency * 0.5, // Gentler frequency drop
+                frequency * 0.4,
                 this.audioContext.currentTime + duration
             );
 
-            // Configure filter (lowpass for softer, rounder sound)
+            // Configure high harmonic (2x frequency for brightness)
+            oscillator2.type = 'sine';
+            oscillator2.frequency.setValueAtTime(frequency * 2, this.audioContext.currentTime);
+            oscillator2.frequency.exponentialRampToValueAtTime(
+                frequency * 0.8,
+                this.audioContext.currentTime + duration
+            );
+
+            // Configure filter (bandpass for crisp, punchy sound)
             filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(1200, this.audioContext.currentTime); // Lower cutoff
-            filter.Q.value = 1; // Softer rolloff
+            filter.frequency.setValueAtTime(2000, this.audioContext.currentTime); // Higher cutoff
+            filter.Q.value = 1.5;
 
             // Configure gain (smooth fade out)
             gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(adjustedVolume, this.audioContext.currentTime + 0.01); // Soft attack
+            gainNode.gain.linearRampToValueAtTime(adjustedVolume, this.audioContext.currentTime + 0.01);
             gainNode.gain.exponentialRampToValueAtTime(
                 0.001,
                 this.audioContext.currentTime + duration
             );
 
-            // Play sound
+            gainNode2.gain.setValueAtTime(adjustedVolume * 0.3, this.audioContext.currentTime);
+            gainNode2.gain.exponentialRampToValueAtTime(
+                0.001,
+                this.audioContext.currentTime + duration * 0.7
+            );
+
+            // Play sounds
             oscillator.start(this.audioContext.currentTime);
             oscillator.stop(this.audioContext.currentTime + duration);
+            oscillator2.start(this.audioContext.currentTime);
+            oscillator2.stop(this.audioContext.currentTime + duration);
             
             // Decrease active sound count when done
             setTimeout(() => {
@@ -129,35 +149,35 @@ class AudioManager {
     }
 
     /**
-     * Create a bubble creation sound
+     * Create a bubble creation sound - Enhanced
      */
     createBubbleSound() {
-        if (!this.enabled || !this.audioContext) return;
+        if (!this.enabled || !this.audioContext || !this.masterGain) return;
 
         try {
             const oscillator = this.audioContext.createOscillator();
             const gainNode = this.audioContext.createGain();
 
             oscillator.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
+            gainNode.connect(this.masterGain);
 
-            // Soft, high-pitched sound
+            // Crisp, high-pitched sound (1200-1600Hz)
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(randomRange(1200, 1600), this.audioContext.currentTime);
             oscillator.frequency.exponentialRampToValueAtTime(
-                1200,
-                this.audioContext.currentTime + 0.05
+                1800,
+                this.audioContext.currentTime + 0.08
             );
 
-            // Very quiet
-            gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+            // Louder - 0.15 volume
+            gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(
-                0.01,
-                this.audioContext.currentTime + 0.05
+                0.001,
+                this.audioContext.currentTime + 0.08
             );
 
             oscillator.start(this.audioContext.currentTime);
-            oscillator.stop(this.audioContext.currentTime + 0.05);
+            oscillator.stop(this.audioContext.currentTime + 0.08);
         } catch (error) {
             console.warn('Failed to create bubble sound:', error);
         }
@@ -208,12 +228,12 @@ class AudioManager {
     }
 
     /**
-     * Play pop sound with random variations
+     * Play pop sound with random variations - Enhanced
      */
     playPopSound() {
-        const frequency = randomRange(400, 800); // Lower, gentler
-        const duration = randomRange(0.12, 0.18); // Slightly longer
-        const volume = randomRange(0.06, 0.12); // Even softer for better stacking
+        const frequency = randomRange(600, 1200); // Higher, crisper
+        const duration = randomRange(0.12, 0.18);
+        const volume = randomRange(0.15, 0.25); // Much louder
         this.createPopSound({ frequency, duration, volume });
     }
 
@@ -225,12 +245,12 @@ class AudioManager {
     }
 
     /**
-     * Play BGM (series of harmonious tones)
+     * Play BGM - Enhanced with louder chords
      */
     playPopBGM() {
         if (!this.enabled || !this.audioContext || !this.masterGain) return;
 
-        // Play a gentle, harmonious chord progression
+        // Play harmonious chord progression - louder
         const baseFrequencies = [
             261.63, // C4
             329.63, // E4
@@ -240,16 +260,15 @@ class AudioManager {
 
         baseFrequencies.forEach((freq, index) => {
             setTimeout(() => {
-                // Use dedicated method to bypass concurrent sound limit
-                this.createBackgroundTone(freq);
-            }, index * 150); // Slower progression
+                this.createBackgroundTone(freq, 0.12); // Increased from 0.05 to 0.12
+            }, index * 150);
         });
     }
     
     /**
-     * Create background tone (bypasses concurrent sound limit)
+     * Create background tone - Enhanced volume
      */
-    createBackgroundTone(frequency) {
+    createBackgroundTone(frequency, volume = 0.12) {
         if (!this.enabled || !this.audioContext || !this.masterGain) return;
         
         try {
@@ -269,7 +288,6 @@ class AudioManager {
             filter.Q.value = 1;
 
             const duration = 0.8;
-            const volume = 0.05; // Very soft
 
             gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.1);
@@ -283,7 +301,7 @@ class AudioManager {
     }
 
     /**
-     * Create gentle whoosh sound effect (instead of harsh explosion)
+     * Play powerful BOOM explosion sound
      */
     playExplosionSound() {
         if (!this.enabled || !this.audioContext || !this.masterGain) return;
@@ -291,42 +309,70 @@ class AudioManager {
         try {
             const duration = 0.8;
             
-            // Create gentle filtered noise (like a soft breeze)
+            // Create powerful noise burst
             const bufferSize = this.audioContext.sampleRate * duration;
             const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
             const output = buffer.getChannelData(0);
 
             for (let i = 0; i < bufferSize; i++) {
-                // Gentler noise with smooth envelope
-                const envelope = Math.exp(-i / (bufferSize * 0.4));
-                output[i] = (Math.random() * 2 - 1) * envelope * 0.2; // Even quieter
+                // Powerful noise with sharp attack
+                const envelope = Math.exp(-i / (bufferSize * 0.3));
+                output[i] = (Math.random() * 2 - 1) * envelope * 0.5;
             }
 
             const source = this.audioContext.createBufferSource();
             source.buffer = buffer;
 
+            // Low frequency boom
+            const lowOsc = this.audioContext.createOscillator();
+            lowOsc.type = 'sine';
+            lowOsc.frequency.setValueAtTime(80, this.audioContext.currentTime);
+            lowOsc.frequency.exponentialRampToValueAtTime(40, this.audioContext.currentTime + duration);
+
+            // Mid frequency burst
+            const midOsc = this.audioContext.createOscillator();
+            midOsc.type = 'sawtooth';
+            midOsc.frequency.setValueAtTime(600, this.audioContext.currentTime);
+            midOsc.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + duration);
+
             const gainNode = this.audioContext.createGain();
+            const lowGain = this.audioContext.createGain();
+            const midGain = this.audioContext.createGain();
             const filter = this.audioContext.createBiquadFilter();
 
             source.connect(filter);
+            lowOsc.connect(lowGain);
+            midOsc.connect(midGain);
             filter.connect(gainNode);
-            gainNode.connect(this.masterGain); // Connect through master gain
+            lowGain.connect(gainNode);
+            midGain.connect(gainNode);
+            gainNode.connect(this.masterGain);
 
-            // Very gentle lowpass filter
-            filter.type = 'lowpass';
-            filter.frequency.setValueAtTime(800, this.audioContext.currentTime);
-            filter.frequency.exponentialRampToValueAtTime(200, this.audioContext.currentTime + duration);
-            filter.Q.value = 0.5; // Soft rolloff
+            // Filter for punch
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(150, this.audioContext.currentTime + duration);
+            filter.Q.value = 2;
 
-            // Very soft volume - reduced even more
+            // Powerful volume - 0.15
             gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.04, this.audioContext.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0.15, this.audioContext.currentTime + 0.03);
             gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+            lowGain.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+            lowGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration * 0.5);
+
+            midGain.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+            midGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration * 0.3);
 
             source.start();
             source.stop(this.audioContext.currentTime + duration);
+            lowOsc.start();
+            lowOsc.stop(this.audioContext.currentTime + duration);
+            midOsc.start();
+            midOsc.stop(this.audioContext.currentTime + duration);
         } catch (error) {
-            console.warn('Failed to create whoosh sound:', error);
+            console.warn('Failed to create explosion sound:', error);
         }
     }
 
@@ -369,6 +415,47 @@ class AudioManager {
         if (this.ambientSource && this.ambientPlaying) {
             this.ambientSource.stop();
             this.ambientPlaying = false;
+        }
+    }
+
+    /**
+     * Play combo sound based on level
+     */
+    playComboSound(level = 1) {
+        if (!this.enabled || !this.audioContext || !this.masterGain) return;
+
+        try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.masterGain);
+
+            // Different pitches for different combo levels
+            const frequencies = {
+                1: [523.25, 659.25, 783.99], // C5, E5, G5 - NICE
+                2: [659.25, 783.99, 987.77], // E5, G5, B5 - AMAZING
+                3: [783.99, 987.77, 1174.66] // G5, B5, D6 - INSANE
+            };
+
+            const chordFreqs = frequencies[level] || frequencies[1];
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(chordFreqs[0], this.audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(chordFreqs[1], this.audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(chordFreqs[2], this.audioContext.currentTime + 0.2);
+
+            const duration = 0.6;
+            const volume = 0.15;
+
+            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + duration);
+        } catch (error) {
+            console.warn('Failed to create combo sound:', error);
         }
     }
 
