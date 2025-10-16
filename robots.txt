@@ -1,13 +1,28 @@
 # robots.txt for Stress.tw
+# Allow all search engines to crawl the site
+
 User-agent: *
 Allow: /
-
-# Disallow admin or private directories (if any)
-# Disallow: /admin/
+Disallow: /js/
+Disallow: /css/
+Disallow: /audio/
+Disallow: /*.js$
+Disallow: /*.css$
 
 # Sitemap location
 Sitemap: https://stress.tw/sitemap.xml
 
-# Crawl-delay (optional, for rate limiting)
-Crawl-delay: 1
+# Special rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /favicon.svg
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl rate
+Crawl-delay: 0
 
